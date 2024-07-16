@@ -1,31 +1,6 @@
-% This is an solver function utilizing the cubic regurized algorithm.
-%
-% 
-% Input: 
-%   - x: [Pop;Params] where Params: (1 x 2*S+1 vector) all necessary parameters ([p_i,r_i, d_i, b_i, E_i^n_i, n_i], c) 
-%   - DATA: (NT x ND x NR matrix) observation
-%   - Conc: (1 x ND vector) concentration levels
-%   - Time: (1 x NT vector) of time points
-%   - MEAN_initial: (scalar) initial total cell number
-%   - num_sub: (scalar) number of sub-population: S
-%   - lb: (1 x 2*S+1 vector) lower bound ([p_i],[r_i,d_i,b_i,E_i^n_i,n_i],c)
-%   - ub: (1 x 2*S+1 vector) upper bound ([p_i],[r_i,d_i,b_i,E_i^n_i,n_i],c)
-%   - max_iter: (scalar) Maximum iteration
-%
-% Output:
-%   - Params: (1) objective value
-%   - grad: (1 x 6*S+1 vector) gradient at Params
-%   - Hess: (6*S+1 x 6*S+1 matrix) Hessian matrix at Params
-%
-% Requirment:
-%   - mu(d,t,theta)
-%   - sig(d,t,theta)
-
-
-function [x, val,nor_dis,nor_dis2,jj]=CRNAS(Dx,x,DATA,init,matrix_A,vec_b,lb,ub,max_iter,opt_tol,step_tol)
+function [x, val,jj]=CRNAS(func_all,func_obj,func_inputs,x,DATA,Design,matrix_A,vec_b,lb,ub,max_iter,opt_tol,step_tol)
     step_size=6e-1;
     thro=step_size^2;
-    low_n=0.2;
     if any(lb>ub)
         error('upper bound is lower than lower bound')
     end
@@ -51,14 +26,14 @@ function [x, val,nor_dis,nor_dis2,jj]=CRNAS(Dx,x,DATA,init,matrix_A,vec_b,lb,ub,
     mat_invhalf=sparse(size(free_variables,2),size(free_variables,2));
     set_nonzero_free=full(any(adj(pivot_variables,:),1));
     val=[];
-    nor_dis=[];
-    nor_dis2=[];
+    % nor_dis=[];
+    % nor_dis2=[];
     t=1;
     sigma=1;
     sigma0=-Inf;
     count=0;
     for jj=0:max_iter % Max iter
-        [f,g_x,hess]=mix_logistic_nl_full(x,DATA,Dx,init,2,2); %%%
+        [f,g_x,hess]=func_all(x,DATA,Design,func_inputs); %%%
         val=[val,f];      
         ve1=min(x-lb,ub-x);
         ve=1./(ve1.^2);
@@ -72,7 +47,7 @@ function [x, val,nor_dis,nor_dis2,jj]=CRNAS(Dx,x,DATA,init,matrix_A,vec_b,lb,ub,
         B=adj.'*hess*adj;
         g=adj.'*g_x;  %%%
         if norm(g)^2<opt_tol^2 % OptimalityTolerance
-            fprintf('First optimality condition belows the tolerance.')
+            fprintf('First optimality condition belows the tolerance. \n')
             break
         end
         s=mat_invhalf*cub_new_sub(mat_invhalf.'*g,mat_invhalf.'*B*mat_invhalf,sigma); %%%
@@ -96,12 +71,14 @@ function [x, val,nor_dis,nor_dis2,jj]=CRNAS(Dx,x,DATA,init,matrix_A,vec_b,lb,ub,
             % keyboard
         end
         x1=x+t*delta_x;
-        ff=mix_logistic_nl_full(x,DATA,Dx,init,2,0); 
-        f2=mix_logistic_nl_full(x1,DATA,Dx,init,2,0);
+        ff=func_obj(x,DATA,Design,func_inputs); 
+        f2=func_obj(x1,DATA,Design,func_inputs);
         if any(x1<lb) || any (x1>ub)
             keyboard
-            error('iteration point is not feasible')
+            error('iteration point is not feasible \n')
         end
+            
+            
         %%%%%%%%%%%
         for jjj=1:100
             if f2>ff+1e-7%%%%+sol_x.'*g+0.5*sol_x.'*B*sol_x + sigma*(sol_x.'*mat*sol_x)^1.5/3 %%%%%%%
@@ -116,7 +93,7 @@ function [x, val,nor_dis,nor_dis2,jj]=CRNAS(Dx,x,DATA,init,matrix_A,vec_b,lb,ub,
                     delta_x=adj*sol_x;
                 end
                 x1=x+t*delta_x;
-                f2=mix_logistic_nl_full(x1,DATA,Dx,init,2,0);
+                f2=func_obj(x1,DATA,Design,func_inputs);
             else
                 break
             end
@@ -125,13 +102,13 @@ function [x, val,nor_dis,nor_dis2,jj]=CRNAS(Dx,x,DATA,init,matrix_A,vec_b,lb,ub,
             end
         end
         if ~isreal(delta_x)
-            fprintf('The delta_x is not real.')
+            fprintf('The delta_x is not real. \n')
             keyboard
         end
         sigma=max(sigma/2,sigma0);
         x=x+t*delta_x;
         if norm(delta_x)<step_tol
-            fprintf('Step size belows the tolerance.')
+            fprintf('Step size belows the tolerance. \n')
             break
         end
     end
