@@ -51,7 +51,7 @@ fmin_active_est_hist  = [];
 theta_hist = [];
 x_init_hist = [];
 NR = 1;
-num_sub = 5;  % Change the number of subpopulation here
+num_sub = 3;  % Change the number of subpopulation here
 num_opt = 20;
 num_idx = 100;
 max_iter = 500;
@@ -182,7 +182,7 @@ parfor i = 1:num_idx
         param_vec_0=[Pop;vec(param)];
         % fun_min=@(param_vec) mean((INIT*param_vec(1)*popfunc2(param_vec(3:6),Conc,Time.')+INIT*param_vec(2)*popfunc2(param_vec(7:10),Conc,Time.')-Observations_ave).^2,'all')/2;
         fun_min = @(theta) my_fun_obj(Conc,Time,NR,theta,Observations_ave,INIT,num_sub); % return obj gradient and hess
-        [param_vec,fv,ef,output] = fmincon(fun_min,param_vec_0,[],[],[],[],[],[],[],options1);
+        [param_vec,fv,ef,output] = fmincon(fun_min,param_vec_0,[],[],Aeq,beq,lb,ub,[],options1);
 
         val_fmin_IP=[val_fmin_IP,fun_min(param_vec)];    % Record the objective value
         iter_fmin_IP = [iter_fmin_IP,output.iterations]; % Record the iteration number
@@ -219,7 +219,7 @@ parfor i = 1:num_idx
         param_vec_0=[Pop;vec(param)];
         % fun_min=@(param_vec) mean((INIT*param_vec(1)*popfunc2(param_vec(3:6),Conc,Time.')+INIT*param_vec(2)*popfunc2(param_vec(7:10),Conc,Time.')-Observations_ave).^2,'all')/2;
         fun_min = @(theta) my_fun(Conc,Time,NR,theta,Observations_ave,INIT,num_sub); % return obj gradient and hess
-        [param_vec,fv,ef,output] = fmincon(fun_min,param_vec_0,[],[],[],[],[],[],[],options1);
+        [param_vec,fv,ef,output] = fmincon(fun_min,param_vec_0,[],[],Aeq,beq,lb,ub,[],options1);
 
         val_fmin_IP_hess=[val_fmin_IP_hess,fun_min(param_vec)];     % Record the objective
         iter_fmin_IP_hess = [iter_fmin_IP_hess, output.iterations]; % Record the iteration

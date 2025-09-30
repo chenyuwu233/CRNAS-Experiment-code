@@ -2,8 +2,8 @@
 % load('S equal to 1 experiment\Result\opt20_100_uc_mono.mat') % S = 1 experiment
 % load('S equal to 2 experiment\Result\opt20_100_uc.mat') % S = 2 experiment
 % load('S equal to 2 experiment\Result\opt20_100_wc.mat') % S = 2 experiment with upperbound constraint
-load('S greater than 2 experiment\Result\opt20_100_uc_ng_sub3.mat') % S = 3 experiment
-% load('S greater than 2 experiment\Result\opt20_100_uc_ng_sub5.mat') % S = 5 experiment
+% load('S greater than 2 experiment\Result\opt20_100_uc_ng_sub3.mat') % S = 3 experiment
+ load('S greater than 2 experiment\Result\opt20_100_uc_ng_sub5.mat') % S = 5 experiment
 %% Computational time
 
 t = tiledlayout(1,3);

@@ -1,13 +1,12 @@
 %% Non convex quadratic programing
 
 function [x]=mynonconvexqp(A,b,Q,c,R_inv)
-    x1=zeros(size(A,2),1);
     set_noninf=all(~isinf(Q),2);
     A=A(set_noninf,set_noninf);
     b=b(set_noninf);
     Q=Q(set_noninf,set_noninf);
     R_inv=R_inv(set_noninf,set_noninf);
-    
+    x1=zeros(size(b));
     if nargin <5
         [R,flag]=chol(Q);
         if flag~=0
@@ -21,9 +20,6 @@ function [x]=mynonconvexqp(A,b,Q,c,R_inv)
     if d_(1)>0
         x=-A\b;
         if x.'*Q*x <= c
-            x1(set_noninf)=x;
-          
-            x=x1;
             return 
         end
     end

@@ -66,7 +66,7 @@ step_tol = 1e-6;
 
 
 lb=[0;0;repmat([0;0;0;0.2],2,1)];
-ub=[1;1;repmat([1;1;Inf;Inf],2,1)]; % Change the upperbound here
+ub=[1;1;repmat([1;1;100;100],2,1)]; % Change the upperbound here
 
 
 
@@ -168,7 +168,7 @@ parfor i = 1:num_idx
         param_vec_0=[Pop;vec(param)];
         fun_min=@(param_vec) mean((INIT*param_vec(1)*popfunc2(param_vec(3:6),Conc,Time.')+INIT*param_vec(2)*popfunc2(param_vec(7:10),Conc,Time.')-Observations_ave).^2,'all')/2;
         % fun_min = @(theta) my_fun_grad(Conc,Time,NR,theta,Observations_ave,INIT,num_sub); % return obj gradient and hess
-        [param_vec,fv,ef,output] = fmincon(fun_min,param_vec_0,A,b,[],[],lb,ub,[],options1);
+        [param_vec,fv,ef,output] = fmincon(fun_min,param_vec_0,A,b,Aeq,beq,lb,ub,[],options1);
         val_fmin_IP=[val_fmin_IP,fun_min(param_vec)];    % Record the obj
         iter_fmin_IP = [iter_fmin_IP,output.iterations]; % Record the iteration
         Pop=param_vec(1:2);
@@ -203,7 +203,7 @@ parfor i = 1:num_idx
         param_vec_0=[Pop;vec(param)];
         % fun_min=@(param_vec) mean((INIT*param_vec(1)*popfunc2(param_vec(3:6),Conc,Time.')+INIT*param_vec(2)*popfunc2(param_vec(7:10),Conc,Time.')-Observations_ave).^2,'all')/2;
         fun_min = @(theta) my_fun(Conc,Time,NR,theta,Observations_ave,INIT,num_sub); % return obj gradient and hess
-        [param_vec,fv,ef,output] = fmincon(fun_min,param_vec_0,A,b,[],[],lb,ub,[],options1);
+        [param_vec,fv,ef,output] = fmincon(fun_min,param_vec_0,A,b,Aeq,beq,lb,ub,[],options1);
         val_fmin_IP_hess=[val_fmin_IP_hess,fun_min(param_vec)];    % Record the obj
         iter_fmin_IP_hess = [iter_fmin_IP_hess,output.iterations]; % Record the iteration
         Pop=param_vec(1:2);
@@ -239,7 +239,7 @@ parfor i = 1:num_idx
         param_vec_0=[Pop;vec(param)];
         fun_min=@(param_vec) mean((INIT*param_vec(1)*popfunc2(param_vec(3:6),Conc,Time.')+INIT*param_vec(2)*popfunc2(param_vec(7:10),Conc,Time.')-Observations_ave).^2,'all')/2;
         % fun_min = @(theta) my_fun(Conc,Time,NR,theta,Observations_ave,INIT,num_sub); % return obj gradient and hess
-        [param_vec,fv,ef,output] = fmincon(fun_min,param_vec_0,A,b,[],[],lb,ub,[],options1);
+        [param_vec,fv,ef,output] = fmincon(fun_min,param_vec_0,A,b,Aeq,beq,lb,ub,[],options1);
         
         val_fmin_sqp=[val_fmin_sqp,fun_min(param_vec)];    % Record the objective
         iter_fmin_sqp = [iter_fmin_sqp,output.iterations]; % Record the iteration
@@ -278,7 +278,7 @@ parfor i = 1:num_idx
         param_vec_0=[Pop;vec(param)];
         % fun_min=@(param_vec) mean((INIT*param_vec(1)*popfunc2(param_vec(3:6),Conc,Time.')+INIT*param_vec(2)*popfunc2(param_vec(7:10),Conc,Time.')-Observations_ave).^2,'all')/2;
         fun_min = @(theta) my_fun_grad(Conc,Time,NR,theta,Observations_ave,INIT,num_sub); % return obj gradient and hess
-        [param_vec,fv,ef,output] = fmincon(fun_min,param_vec_0,A,b,[],[],lb,ub,[],options1);
+        [param_vec,fv,ef,output] = fmincon(fun_min,param_vec_0,A,b,Aeq,beq,lb,ub,[],options1);
         
         val_fmin_sqp_grad=[val_fmin_sqp_grad,fun_min(param_vec)];    % Record the objective
         iter_fmin_sqp_grad = [iter_fmin_sqp_grad,output.iterations]; % Record the iteration
@@ -390,7 +390,8 @@ parfor i = 1:num_idx
         Pop=param_instance(1:num_sub);
         param=reshape(param_instance(num_sub+1:end),4,[]);
         [param,param_, Pop,val,nor_dis,nor_dis2,iter]=mysolve(Conc,Time,NR,Pop,param,Observations_ave,INIT,num_sub,param_acc,param__acc,lb,ub,max_iter,opt_tol,step_tol);
-%         if val(end)<best
+        %[x, val,jj]=CRNAS(my_fun,my_fun_obj,param_ini(:,ii),Aeq,beq,lb,ub,max_iter,opt_tol,step_tol)
+        %         if val(end)<best
 %             best=val(end);
 %             val0=val;
 %         end
@@ -511,5 +512,5 @@ parfor i = 1:num_idx
     i
 end
 
-name = strcat('Result/opt',num2str(num_opt),'_',num2str(num_idx),'_uc.mat');
+name = strcat('Result/opt',num2str(num_opt),'_',num2str(num_idx),'_wc.mat');
 save(name)

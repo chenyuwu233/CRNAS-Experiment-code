@@ -1,0 +1,33 @@
+#!/bin/bash -l
+#SBATCH -A ruping
+
+# Set job time to 2 day.
+#SBATCH --time=2:00:00
+
+# Set a name for the job, visible in `squeue`
+#SBATCH --job-name="PhenoPop_cubic_reg"
+
+# One node.
+#SBATCH --nodes=1
+
+# One task num of threads
+#SBATCH --ntasks=20
+
+# 12GB of RAM
+#SBATCH --mem=50gb
+
+# Who to send mail to.
+#SBATCH --mail-user=wu000766@umn.edu
+
+# What type of mail to send
+#SBATCH --mail-type=ALL
+
+#track job status
+#SBATCH --profile=task
+
+#queue name
+#SBATCH -p agsmall
+
+module load matlab
+
+matlab -nodisplay -nodesktop -nosplash < main_cubic_reg_base.m
